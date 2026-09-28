@@ -15,6 +15,11 @@ public class PedidoEncomienda extends Pedido {
         this.peso = peso;
     }
 
+    // Getter necesarios
+    public double getPeso() {
+        return peso;
+    }
+
     // Sobrescritura para asignar repartidor automáticamente
     @Override
     public void asignarRepartidor() {

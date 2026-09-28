@@ -35,6 +35,9 @@ public abstract class Pedido implements Despachable, Cancelable, Rastreable {
     public int getNumeroPedido() {
         return numeroPedido;
     }
+    public void setNumeroPedido(int numeroPedido) {
+        this.numeroPedido = numeroPedido;
+    }
 
     public double getDistanciaKm() {
         return distanciaKm;
@@ -56,6 +59,9 @@ public abstract class Pedido implements Despachable, Cancelable, Rastreable {
     public String getEstado(){
         return estado;
     }
+    public void setEstado(String estado) {
+        this.estado = estado;
+    }
 
     // Método para mostrar información
 
@@ -75,6 +81,7 @@ public abstract class Pedido implements Despachable, Cancelable, Rastreable {
     // Método implementado desde la interface interfaces.Despachable
 
     @Override
+
     public void despachar(){
         if(cancelado){
             System.out.println("El pedido fue cancelado.");

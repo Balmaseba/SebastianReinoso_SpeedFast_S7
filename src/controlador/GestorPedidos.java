@@ -2,7 +2,6 @@ package controlador;
 
 import java.util.ArrayList;
 import modelo.Pedido;
-import modelo.PedidoExpress;
 
 // Clase para gestionar los pedidos del sistema
 
@@ -49,6 +48,16 @@ public class GestorPedidos {
     // Método para obtener la cantidad de pedidos
     public int getCantidadPedidos(){
         return pedidos.size();
+    }
+    // Método para cargar los pedidos desde la base de datos
+
+    public void cargarPedidos(ArrayList<Pedido> pedidosBD) {
+
+        pedidos.clear();
+
+        if (pedidosBD != null) {
+            pedidos.addAll(pedidosBD);
+        }
     }
 }
 

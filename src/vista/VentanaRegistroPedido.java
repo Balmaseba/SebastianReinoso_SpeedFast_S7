@@ -1,5 +1,6 @@
 package vista;
 
+import dao.PedidoDAO;
 import controlador.GestorPedidos;
 import modelo.Pedido;
 import modelo.PedidoComida;
@@ -24,7 +25,6 @@ public class VentanaRegistroPedido  extends JFrame{
     private GestorPedidos gestorPedidos;
 
     // Componentes del formulario
-    private JTextField txtId;
     private JTextField txtDireccion;
     private JTextField txtDistancia;
     private JTextField txtPeso;
@@ -48,7 +48,6 @@ public class VentanaRegistroPedido  extends JFrame{
         setLayout(new BorderLayout(10, 10));
 
         // Crear componentes
-        txtId = new JTextField();
         txtDireccion = new JTextField();
         txtDistancia = new JTextField();
         txtPeso = new JTextField(10);
@@ -60,10 +59,8 @@ public class VentanaRegistroPedido  extends JFrame{
         btnGuardar = new JButton("Guardar pedido");
 
         // Panel principal del formulario
-        panelFormulario = new JPanel(new GridLayout(4, 2, 10, 10));
+        panelFormulario = new JPanel(new GridLayout(3, 2, 10, 10));
 
-        panelFormulario.add(new JLabel("ID del pedido:"));
-        panelFormulario.add(txtId);
 
         panelFormulario.add(new JLabel("Dirección:"));
         panelFormulario.add(txtDireccion);
@@ -109,65 +106,153 @@ public class VentanaRegistroPedido  extends JFrame{
             panelAdicional.revalidate();
             panelAdicional.repaint();
         }
+    // Método para guardar un nuevo pedido
 
-        // Método para guardar un pedido
-        private void guardarPedido(){
+    private void guardarPedido() {
 
-            // Validar campos obligatorios
-            if(txtId.getText().trim().isEmpty() || txtDireccion.getText().trim().isEmpty() || txtDistancia.getText().trim().isEmpty()){
+        // Obtener los datos ingresados
+        String direccion = txtDireccion.getText().trim();
+        String distanciaTexto = txtDistancia.getText().trim();
+        String tipo = (String) cmbTipo.getSelectedItem();
 
-                JOptionPane.showMessageDialog(this, "Debe completar todos los campos obligatorios");
+        // Validar la dirección
+        if (direccion.isEmpty()) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Debe ingresar una dirección."
+            );
+            return;
+        }
+
+        // Validar la distancia
+        if (distanciaTexto.isEmpty()) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Debe ingresar la distancia."
+            );
+            return;
+        }
+
+        double distancia;
+
+        try {
+
+            distancia = Double.parseDouble(distanciaTexto);
+
+            if (distancia <= 0) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "La distancia debe ser mayor a 0."
+                );
                 return;
             }
 
-            try {
-                // Obtener datos del formulario
-                int id = Integer.parseInt(txtId.getText().trim());
-                String direccion = txtDireccion.getText().trim();
-                double distancia = Double.parseDouble(txtDistancia.getText().trim());
+        } catch (NumberFormatException e) {
 
-                // Validar valores numéricos
-                if (id <= 0 || !Double.isFinite(distancia) || distancia <= 0){
-                    JOptionPane.showMessageDialog(this, "El ID y la Distancia deben ser mayores a cero.");
-                    return;
-                }
-
-                // Verificar que el ID no esté registrado
-                if(gestorPedidos.buscarPedido(id) != null){
-                    JOptionPane.showMessageDialog(this, "Ya existe un pedido con ese ID.");
-                    return;
-                }
-                Pedido pedido;
-                String tipo = (String) cmbTipo.getSelectedItem();
-
-                // Crrear el pedido según el tipo seleccionado
-                if(tipo.equals("Comida")){
-
-                    pedido = new PedidoComida(id, direccion, distancia);
-                } else if (tipo.equals("Encomienda")){
-                    // Validar peso
-                    double peso = Double.parseDouble(txtPeso.getText().trim());
-
-                    if (!Double.isFinite(peso) || peso <= 0){
-                        JOptionPane.showMessageDialog(this, "El Peso debe ser mayor a cero.");
-                        return;
-                    }
-
-                    pedido = new PedidoEncomienda(id, direccion, distancia, peso);
-                }else{
-                    pedido = new PedidoExpress(id,direccion, distancia);
-                }
-
-                // Registrar el pedido en el controlador
-                if(gestorPedidos.registrarPedido(pedido)){
-                    JOptionPane.showMessageDialog(this, "Pedido registrado correctamente.");
-                    dispose();
-                }else{
-                    JOptionPane.showMessageDialog(this,"No se pudo registrar el pedido.");
-                }
-            }catch(NumberFormatException e){
-                JOptionPane.showMessageDialog(this, "Ingrese valores numéricos válidos");
-            }
+            JOptionPane.showMessageDialog(
+                    this,
+                    "La distancia debe ser un número válido."
+            );
+            return;
         }
+
+        // Variable para almacenar el pedido que se creará
+        Pedido pedido;
+
+        // Crear el pedido según el tipo seleccionado
+        if (tipo.equals("Comida")) {
+
+            pedido = new PedidoComida(
+                    0,
+                    direccion,
+                    distancia
+            );
+
+        } else if (tipo.equals("Encomienda")) {
+
+            String pesoTexto = txtPeso.getText().trim();
+
+            // Validar el peso
+            if (pesoTexto.isEmpty()) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Debe ingresar el peso de la encomienda."
+                );
+                return;
+            }
+
+            double peso;
+
+            try {
+
+                peso = Double.parseDouble(pesoTexto);
+
+                if (peso <= 0) {
+                    JOptionPane.showMessageDialog(
+                            this,
+                            "El peso debe ser mayor a 0."
+                    );
+                    return;
+                }
+
+            } catch (NumberFormatException e) {
+
+                JOptionPane.showMessageDialog(
+                        this,
+                        "El peso debe ser un número válido."
+                );
+                return;
+            }
+
+            pedido = new PedidoEncomienda(
+                    0,
+                    direccion,
+                    distancia,
+                    peso
+            );
+
+        } else {
+
+            pedido = new PedidoExpress(
+                    0,
+                    direccion,
+                    distancia
+            );
+        }
+
+        // Crear DAO para gestionar el pedido en la base de datos
+        PedidoDAO pedidoDAO = new PedidoDAO();
+
+        // Guardar primero el pedido en la base de datos
+        if (pedidoDAO.guardar(pedido)) {
+
+            // Registrar el pedido en el controlador con el ID generado
+            if (gestorPedidos.registrarPedido(pedido)) {
+
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Pedido registrado correctamente.\n"
+                                + "ID generado: " + pedido.getNumeroPedido()
+                );
+
+                dispose();
+
+            } else {
+
+                JOptionPane.showMessageDialog(
+                        this,
+                        "El pedido fue guardado en la base de datos, "
+                                + "pero no se pudo registrar en el controlador."
+                );
+            }
+
+        } else {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "No se pudo guardar el pedido en la base de datos."
+            );
+        }
+    }
 
 }
